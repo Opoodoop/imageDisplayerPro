@@ -6,13 +6,44 @@ use rodio::{Decoder, OutputStream, Sink};
 use std::io::Cursor;
 
 // Embed the image and sound data into the portable .EXE at build time
-const IMAGE_DATA: &[u8] = include_bytes!("image.png");
-const AUDIO_DATA: &[u8] = include_bytes!("sound.mp3");
+// change this to the name of your audio files if they're not mp3
+const IMAGE_DATA: &[u8] = include_bytes!("image.png"); // [Default: "image.png"] [any file of types: png, gif, tif, jpg/jpeg, bmp]
+const AUDIO_DATA: &[u8] = include_bytes!("sound.mp3"); // [Default: "sound.mp3"] [any file of types: mp3, flac, ogg, wav]
 
-// Config 'n' shit.
-const WINDOW_TITLE: &str = "Image Displayer Pro";   // ["Image Displayer Pro"] Title of the window.
-const EXIT_KEY: Key = Key::Escape;                  // [Key::Escape] Key to close the window
-const HIDE_CLOSE: bool = true;                      // [true] Wether or not to hide window decorations
+/// Window title
+/// [Default: "Image Displayer Pro"] [Any string]
+const WINDOW_TITLE: &str = "Image Displayer Pro";
+
+
+/// Window scaling factor
+/// [Default: X1] [X1, X2, X4, X8, X16, X32, FitScreen]
+const SCALE: minifb::Scale = minifb::Scale::X1;
+
+
+/// Window close keybind
+/// [Default: Escape] [Any valid Key enum]
+const EXIT_KEY: Key = Key::Escape;
+
+
+/// Enable Window close keybind
+/// [Default: true] [true, false]
+const EXIT_KEY_ENABLED: bool = true;
+
+
+/// Hide window decorations
+/// [Default: true] [true, false]
+const HIDE_CLOSE: bool = true;
+
+
+/// Keep window always on top
+/// [Default: true] [true, false]
+const ALWAYS_ON_TOP: bool = true;
+
+
+/// Show executable icon in title bar
+/// [Default: false] [true, false]
+const ICON_ENABLED: bool = false;
+
 
 fn main() {
     // Load the image
@@ -44,11 +75,11 @@ fn main() {
         height,
         WindowOptions {
             borderless: HIDE_CLOSE,
-            title: false,
-            resize: false,
-            scale: minifb::Scale::X1,
+            title: ICON_ENABLED,
+            resize: true,
+            scale: SCALE,
             scale_mode: minifb::ScaleMode::AspectRatioStretch,
-            topmost: true,
+            topmost: ALWAYS_ON_TOP,
             transparency: false,
             none: false,
         },
@@ -60,7 +91,7 @@ fn main() {
     window.set_target_fps(60);
 
     // Displays the window prepared before and handles updates
-    while window.is_open() && !window.is_key_down(EXIT_KEY) {
+    while window.is_open() && !(window.is_key_down(EXIT_KEY) && EXIT_KEY_ENABLED) {
         window.update_with_buffer(&buffer, width, height).unwrap();
     }
 
